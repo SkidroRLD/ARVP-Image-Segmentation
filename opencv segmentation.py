@@ -69,13 +69,26 @@ def getOrientation(pts, img): # Using PCA analysis for orientation analysis
 
 
 def main():
-    img = cv.imread("in1.jpg")
+    img = cv.imread("in3.jpg")
     # vid = cv.VideoCapture(0)
+    # while(1):
     # confirm, img = vid.read()
-
+    # img = cv.resize(img, (640,400), interpolation= cv.INTER_LINEAR)
+    hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)  # Convert image to grayscale
+    
+    #thresholding for purple
+    colour = np.uint8([[[255, 192, 203]]]) #here insert the bgr values which you want to convert to hsv
+    hsvColour = cv.cvtColor(colour, cv.COLOR_BGR2HSV)
 
-    _, bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU) # Convert image to binary
+    lowerLimit = hsvColour[0][0][0] - 10, 100, 100
+    upperLimit = hsvColour[0][0][0] + 10, 255, 255
+    print(type(lowerLimit))
+    print(upperLimit)
+    mask = cv.inRange(hsv_img, lowerLimit, upperLimit)
+    result = cv.bitwise_and(img, img, mask = mask)
+
+    _, bw = cv.threshold(result, 0, 225, cv.THRESH_BINARY | cv.THRESH_OTSU) # Convert image to binary
 
     contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE) # Find all the contours in the thresholded image
 
@@ -91,9 +104,8 @@ def main():
         getOrientation(c, img)
 
     cv.imshow('Output Image', img)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
-    cv.imwrite("output_img.jpg", img)
+    cv.waitKey(1)
+    # cv.imwrite("output_img.jpg", img)
 
 
 if __name__ == "__main__":
