@@ -83,14 +83,18 @@ def main():
 
     lowerLimit = hsvColour[0][0][0] - 10, 100, 100
     upperLimit = hsvColour[0][0][0] + 10, 255, 255
-    print(type(lowerLimit))
-    print(upperLimit)
+
+    lowerLimit = tuple([int(i) for i in lowerLimit])
+    upperLimit = tuple([int(i) for i in upperLimit])
+
     mask = cv.inRange(hsv_img, lowerLimit, upperLimit)
     result = cv.bitwise_and(img, img, mask = mask)
+    cv.imshow('test',result)
+    cv.waitKey()
+    result = cv.cvtColor(result, cv.COLOR_BGR2GRAY)
+    _, bw = cv.threshold(result, 0, 225, cv.THRESH_BINARY) # Convert image to binary
 
-    _, bw = cv.threshold(result, 0, 225, cv.THRESH_BINARY | cv.THRESH_OTSU) # Convert image to binary
-
-    contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE) # Find all the contours in the thresholded image
+    contours, _ = cv.findContours(bw, cv.RETR_FLOODFILL, cv.CHAIN_APPROX_NONE) # Find all the contours in the thresholded image
 
     for i, c in enumerate(contours):
 
